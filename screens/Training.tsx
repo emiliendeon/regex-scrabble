@@ -133,7 +133,7 @@ const Training = () => {
                 ))}
             </View>
             {trainingItems.length >= 1 ? (
-                <Button title="Valider" onPress={() => setValidated(true)} />
+                <Button title="Valider" onPress={() => setValidated(true)} disabled={validated} />
             ) : null}
             {validated && (
                 <Text style={styles.result}>

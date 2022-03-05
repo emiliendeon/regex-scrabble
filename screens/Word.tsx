@@ -1,9 +1,10 @@
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import React from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import React, { useEffect, useRef } from "react";
+import { ScrollView, StyleSheet, Text, TouchableWithoutFeedback, View } from "react-native";
 import Button from "../components/forms/Button";
 import DictionarySlice from "../reducers/dictionary";
+import WordSelectors from "../selectors/word";
 import { useDispatch, useSelector } from "../store";
 import Regex from "../utils/regex";
 
@@ -13,6 +14,17 @@ const Word = () => {
     const navigation = useNavigation<NativeStackNavigationProp<any>>();
 
     const { currentWord } = useSelector(state => state.dictionary);
+    const currentWordData = useSelector(state => WordSelectors.currentWordData(state));
+
+    const scrollViewRef = useRef<ScrollView>(null);
+
+    useEffect(() => {
+        scrollViewRef.current?.scrollTo({ y: 0 });
+    }, [currentWord]);
+
+    const goToWord = (newWord: string) => {
+        dispatch(DictionarySlice.actions.setCurrentWord(newWord));
+    };
 
     const goToAnagrams = () => {
         if (currentWord) {
@@ -28,9 +40,23 @@ const Word = () => {
         }
     };
 
+    const goToAnagramsSub2 = () => {
+        if (currentWord) {
+            dispatch(DictionarySlice.actions.setSearch(Regex.anagramSub2(currentWord)));
+            navigation.goBack();
+        }
+    };
+
     const goToAnagramsSup1 = () => {
         if (currentWord) {
             dispatch(DictionarySlice.actions.setSearch(Regex.anagramSup1(currentWord)));
+            navigation.goBack();
+        }
+    };
+
+    const goToAnagramsSup2 = () => {
+        if (currentWord) {
+            dispatch(DictionarySlice.actions.setSearch(Regex.anagramSup2(currentWord)));
             navigation.goBack();
         }
     };
@@ -59,6 +85,20 @@ const Word = () => {
     const goToPrefixes1 = () => {
         if (currentWord) {
             dispatch(DictionarySlice.actions.setSearch(Regex.prefix1(currentWord)));
+            navigation.goBack();
+        }
+    };
+
+    const goToPrefixes2 = () => {
+        if (currentWord) {
+            dispatch(DictionarySlice.actions.setSearch(Regex.prefix2(currentWord)));
+            navigation.goBack();
+        }
+    };
+
+    const goToPrefixes3 = () => {
+        if (currentWord) {
+            dispatch(DictionarySlice.actions.setSearch(Regex.prefix3(currentWord)));
             navigation.goBack();
         }
     };
@@ -114,12 +154,50 @@ const Word = () => {
     }
 
     return (
-        <ScrollView style={styles.container}>
+        <ScrollView ref={scrollViewRef} style={styles.container}>
             <Text style={styles.wordLabel}>{currentWord}</Text>
+            {currentWordData &&
+                (currentWordData.prefixes1.length >= 1 ||
+                    currentWordData.suffixes1.length >= 1) && (
+                    <View style={styles.data}>
+                        <View style={{ ...styles.dataItem, ...styles.prefixes }}>
+                            <Text style={styles.dataItemTitle}>1-Préfixes</Text>
+                            <View style={styles.dataItemContent}>
+                                {currentWordData?.prefixes1.map(prefix => (
+                                    <TouchableWithoutFeedback
+                                        onPress={() => goToWord(`${prefix}${currentWord}`)}
+                                    >
+                                        <Text key={prefix} style={styles.dataWordLabel}>
+                                            <Text style={styles.prefix}>{prefix}</Text>
+                                            {currentWord}
+                                        </Text>
+                                    </TouchableWithoutFeedback>
+                                ))}
+                            </View>
+                        </View>
+                        <View style={{ ...styles.dataItem, ...styles.suffixes }}>
+                            <Text style={styles.dataItemTitle}>1-Suffixes</Text>
+                            <View style={styles.dataItemContent}>
+                                {currentWordData?.suffixes1.map(suffix => (
+                                    <TouchableWithoutFeedback
+                                        onPress={() => goToWord(`${currentWord}${suffix}`)}
+                                    >
+                                        <Text key={suffix} style={styles.dataWordLabel}>
+                                            {currentWord}
+                                            <Text style={styles.suffix}>{suffix}</Text>
+                                        </Text>
+                                    </TouchableWithoutFeedback>
+                                ))}
+                            </View>
+                        </View>
+                    </View>
+                )}
             <View style={styles.buttons}>
                 <Button title="Anagrammes" onPress={goToAnagrams} style={styles.button} />
                 <Button title="Anagrammes -1" onPress={goToAnagramsSub1} style={styles.button} />
+                <Button title="Anagrammes -2" onPress={goToAnagramsSub2} style={styles.button} />
                 <Button title="Anagrammes +1" onPress={goToAnagramsSup1} style={styles.button} />
+                <Button title="Anagrammes +2" onPress={goToAnagramsSup2} style={styles.button} />
                 <Button title="Préfixes (...MOT)" onPress={goToPrefixes} style={styles.button} />
                 <Button title="Suffixes (MOT...)" onPress={goToSuffixes} style={styles.button} />
                 <Button
@@ -128,9 +206,11 @@ const Word = () => {
                     style={styles.button}
                 />
                 <Button title="1-Préfixes (aMOT)" onPress={goToPrefixes1} style={styles.button} />
+                <Button title="2-Préfixes (aaMOT)" onPress={goToPrefixes2} style={styles.button} />
+                <Button title="3-Préfixes (aaaMOT)" onPress={goToPrefixes3} style={styles.button} />
                 <Button title="1-Suffixes (MOTa)" onPress={goToSuffixes1} style={styles.button} />
                 <Button
-                    title="1-Infixe de... (aMOTa)"
+                    title="1-Infixe-1 de... (aMOTa)"
                     onPress={goToInfixes1Of}
                     style={styles.button}
                 />
@@ -171,6 +251,46 @@ const styles = StyleSheet.create({
         paddingVertical: 32,
         fontSize: 24,
         fontWeight: "bold",
+    },
+    data: {
+        flex: 1,
+        display: "flex",
+        flexDirection: "row",
+        marginTop: -4,
+        marginHorizontal: -4,
+        marginBottom: 20,
+        paddingHorizontal: 4,
+    },
+    dataItem: {
+        flex: 1,
+        margin: 4,
+        padding: 8,
+    },
+    prefixes: {
+        backgroundColor: "#eeeeff",
+    },
+    suffixes: {
+        backgroundColor: "#eeffee",
+    },
+    dataItemTitle: {
+        alignSelf: "center",
+        fontSize: 18,
+        fontWeight: "bold",
+    },
+    dataItemContent: {
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        marginTop: 12,
+    },
+    dataWordLabel: {
+        fontSize: 20,
+    },
+    prefix: {
+        color: "#0000af",
+    },
+    suffix: {
+        color: "#00af00",
     },
     buttons: {
         marginHorizontal: 2,
