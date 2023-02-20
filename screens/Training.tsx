@@ -4,8 +4,9 @@ import Button, { RowButton } from "../components/forms/Button";
 import NumberInput from "../components/forms/NumberInput";
 import TextInput from "../components/forms/TextInput";
 import ContainingModal from "../components/modals/Containing";
+import TrainingItem from "../components/TrainingItem";
 import TrainingSlice from "../reducers/training";
-import WordsSelectors, { TrainingItem } from "../selectors/words";
+import WordsSelectors, { TrainingItem as TrainingItemType } from "../selectors/words";
 import { useDispatch, useSelector } from "../store";
 
 const Training = () => {
@@ -20,13 +21,13 @@ const Training = () => {
     const [maxLetters, setMaxLetters] = useState(options.maxLetters);
     const [regex, setRegex] = useState(options.regex);
 
-    const [answers, setAnswers] = useState<{ [K: TrainingItem["originalWord"]]: string }>({});
+    const [answers, setAnswers] = useState<{ [K: TrainingItemType["originalWord"]]: string }>({});
 
     const [validated, setValidated] = useState(false);
 
     const [showContainingModal, setShowContainingModal] = useState<boolean>(false);
 
-    const rightAnswerKeys: TrainingItem["originalWord"][] = useMemo(
+    const rightAnswerKeys: TrainingItemType["originalWord"][] = useMemo(
         () =>
             trainingItems
                 .filter(
@@ -102,34 +103,14 @@ const Training = () => {
             <Button title="Générer les mots" onPress={reset} style={styles.resetButton} />
             <View style={styles.items}>
                 {trainingItems.map(item => (
-                    <View key={item.originalWord} style={styles.item}>
-                        <View style={styles.hintWrapper}>
-                            <Text style={styles.hint}>{item.hint}</Text>
-                        </View>
-                        {validated ? (
-                            <Text
-                                style={{
-                                    ...styles.solutions,
-                                    ...(rightAnswerKeys.includes(item.originalWord)
-                                        ? styles.solutionsRight
-                                        : styles.solutionsWrong),
-                                }}
-                            >
-                                {item.solutions.join("\n")}
-                            </Text>
-                        ) : (
-                            <TextInput
-                                // ref={answersInputsRefs.current[index]}
-                                value={answers[item.originalWord]}
-                                onChange={x => setAnswer(item.originalWord, x)}
-                                // onSubmitEditing={() => {
-                                //     answersInputsRefs.current[index + 1]?.current?.focus();
-                                // }}
-                                cleanPattern="[^A-Z]"
-                                style={styles.answerInput}
-                            />
-                        )}
-                    </View>
+                    <TrainingItem
+                        key={item.originalWord}
+                        item={item}
+                        isValidated={validated}
+                        isAnswerCorrect={rightAnswerKeys.includes(item.originalWord)}
+                        currentInput={answers[item.originalWord]}
+                        onChangeInput={x => setAnswer(item.originalWord, x)}
+                    />
                 ))}
             </View>
             {trainingItems.length >= 1 ? (
@@ -157,7 +138,6 @@ const styles = StyleSheet.create({
         flex: 1,
         paddingTop: 4,
         paddingHorizontal: 4,
-        // paddingBottom: 10,
     },
     regexInput: {
         marginTop: 10,
@@ -173,39 +153,6 @@ const styles = StyleSheet.create({
     },
     items: {
         paddingVertical: 10,
-    },
-    item: {
-        display: "flex",
-        flexDirection: "row",
-        alignItems: "center",
-        paddingVertical: 4,
-        paddingRight: 2,
-    },
-    hintWrapper: {
-        display: "flex",
-        flexDirection: "row",
-        justifyContent: "center",
-        alignItems: "center",
-        flex: 1,
-    },
-    hint: {
-        fontSize: 20,
-        textAlign: "center",
-    },
-    answerInput: {
-        flex: 1,
-        marginLeft: 6,
-    },
-    solutions: {
-        flex: 1,
-        fontSize: 20,
-        textAlign: "center",
-    },
-    solutionsRight: {
-        color: "#00af00",
-    },
-    solutionsWrong: {
-        color: "#df0000",
     },
     result: {
         paddingVertical: 8,
