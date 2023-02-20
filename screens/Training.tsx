@@ -8,6 +8,7 @@ import TrainingItem from "../components/TrainingItem";
 import TrainingSlice from "../reducers/training";
 import WordsSelectors, { TrainingItem as TrainingItemType } from "../selectors/words";
 import { useDispatch, useSelector } from "../store";
+import { TrainingState } from "../types/training";
 
 const Training = () => {
     const dispatch = useDispatch();
@@ -22,8 +23,11 @@ const Training = () => {
     const [regex, setRegex] = useState(options.regex);
 
     const [answers, setAnswers] = useState<{ [K: TrainingItemType["originalWord"]]: string }>({});
+    const [retryingAnswers, setRetryingAnswers] = useState<{
+        [K: TrainingItemType["originalWord"]]: string;
+    }>({});
 
-    const [validated, setValidated] = useState(false);
+    const [trainingState, setTrainingState] = useState<TrainingState>("TRYING");
 
     const [showContainingModal, setShowContainingModal] = useState<boolean>(false);
 
@@ -40,13 +44,30 @@ const Training = () => {
     );
 
     const reset = () => {
-        setValidated(false);
+        setTrainingState("TRYING");
         setAnswers({});
+        setRetryingAnswers({});
         dispatch(TrainingSlice.actions.setOptions({ wordCount, minLetters, maxLetters, regex }));
     };
 
     const setAnswer = (originalWord: string, answer: string) => {
         setAnswers(prev => ({ ...prev, [originalWord]: answer }));
+    };
+
+    const setRetryingAnswer = (originalWord: string, answer: string) => {
+        setRetryingAnswers(prev => ({ ...prev, [originalWord]: answer }));
+    };
+
+    const validate = () => {
+        if (trainingState === "RETRYING") {
+            setAnswers(prev => ({ ...prev, ...retryingAnswers }));
+        }
+        setTrainingState("VALIDATED");
+    };
+
+    const retry = () => {
+        setRetryingAnswers({});
+        setTrainingState("RETRYING");
     };
 
     return (
@@ -99,20 +120,37 @@ const Training = () => {
                     <TrainingItem
                         key={item.originalWord}
                         item={item}
-                        isValidated={validated}
+                        trainingState={trainingState}
                         isAnswerCorrect={rightAnswerKeys.includes(item.originalWord)}
-                        currentInput={answers[item.originalWord]}
-                        onChangeInput={x => setAnswer(item.originalWord, x)}
+                        currentInput={
+                            trainingState === "RETRYING"
+                                ? retryingAnswers[item.originalWord]
+                                : answers[item.originalWord]
+                        }
+                        onChangeInput={x =>
+                            trainingState === "RETRYING"
+                                ? setRetryingAnswer(item.originalWord, x)
+                                : setAnswer(item.originalWord, x)
+                        }
                     />
                 ))}
             </View>
             {trainingItems.length >= 1 ? (
-                <Button title="Valider" onPress={() => setValidated(true)} disabled={validated} />
+                <Button
+                    title="Valider"
+                    onPress={validate}
+                    disabled={trainingState === "VALIDATED"}
+                />
             ) : null}
-            {validated && (
-                <Text style={styles.result}>
-                    {rightAnswerKeys.length}/{trainingItems.length}
-                </Text>
+            {trainingState === "VALIDATED" && (
+                <>
+                    <Text style={styles.result}>
+                        {rightAnswerKeys.length}/{trainingItems.length}
+                    </Text>
+                    {rightAnswerKeys.length < trainingItems.length ? (
+                        <Button title="Recommencer avec ces mots" onPress={retry} />
+                    ) : null}
+                </>
             )}
             <View style={{ height: 20 }} />
             <ContainingModal

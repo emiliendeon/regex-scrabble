@@ -1,11 +1,12 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { TrainingItem as TrainingItemType } from "../selectors/words";
+import { TrainingState } from "../types/training";
 import TextInput from "./forms/TextInput";
 
 type TrainingItemProps = {
     item: TrainingItemType;
-    isValidated: boolean;
+    trainingState: TrainingState;
     isAnswerCorrect?: boolean;
     currentInput: string;
     onChangeInput: (x: string) => void;
@@ -13,7 +14,7 @@ type TrainingItemProps = {
 
 const TrainingItem = ({
     item,
-    isValidated,
+    trainingState,
     isAnswerCorrect,
     currentInput,
     onChangeInput,
@@ -32,11 +33,20 @@ const TrainingItem = ({
                     )}
                 </View>
             </View>
-            {isValidated ? (
+            {trainingState === "VALIDATED" ? (
                 <Text
                     style={{
                         ...styles.solutions,
                         ...(isAnswerCorrect ? styles.solutionsRight : styles.solutionsWrong),
+                    }}
+                >
+                    {item.solutions.join("\n")}
+                </Text>
+            ) : trainingState === "RETRYING" && isAnswerCorrect ? (
+                <Text
+                    style={{
+                        ...styles.solutions,
+                        ...styles.solutionsRight,
                     }}
                 >
                     {item.solutions.join("\n")}
