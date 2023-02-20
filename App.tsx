@@ -5,12 +5,6 @@ import TabNavigator from "./navigation/TabNavigator";
 import store from "./store";
 
 const Root = () => {
-    // const dispatch = useDispatch();
-
-    // useEffect(() => {
-    //     dispatch(DictionarySlice.actions.setWords(ods8));
-    // }, []);
-
     return (
         <NavigationContainer>
             <TabNavigator />

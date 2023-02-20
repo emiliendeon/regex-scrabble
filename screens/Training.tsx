@@ -43,18 +43,11 @@ const Training = () => {
         setValidated(false);
         setAnswers({});
         dispatch(TrainingSlice.actions.setOptions({ wordCount, minLetters, maxLetters, regex }));
-        // dispatch(TrainingSlice.actions.setLastGenerationTimestampToNow());
     };
 
     const setAnswer = (originalWord: string, answer: string) => {
         setAnswers(prev => ({ ...prev, [originalWord]: answer }));
     };
-
-    // const answersInputsRefs = useRef<React.RefObject<RNTextInput>[]>([]);
-
-    // answersInputsRefs.current = trainingItems.map(
-    //     (_, i) => (answersInputsRefs.current && answersInputsRefs.current[i]) ?? createRef()
-    // );
 
     return (
         <ScrollView style={styles.container}>

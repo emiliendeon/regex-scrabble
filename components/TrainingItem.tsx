@@ -18,6 +18,10 @@ const TrainingItem = ({
     currentInput,
     onChangeInput,
 }: TrainingItemProps) => {
+    if (!item) {
+        return null;
+    }
+
     return (
         <View style={styles.item}>
             <View style={styles.instructionWrapper}>
@@ -64,7 +68,7 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "center",
         alignItems: "center",
-        flex: 1,
+        flex: 6,
     },
     hintWrapper: {
         display: "flex",
@@ -79,11 +83,11 @@ const styles = StyleSheet.create({
         color: "#afafaf",
     },
     answerInput: {
-        flex: 1,
+        flex: 4,
         marginLeft: 6,
     },
     solutions: {
-        flex: 1,
+        flex: 4,
         fontSize: 20,
         textAlign: "center",
     },

@@ -165,6 +165,7 @@ const Word = () => {
                             <View style={styles.dataItemContent}>
                                 {currentWordData?.prefixes1.map(prefix => (
                                     <TouchableWithoutFeedback
+                                        key={`${prefix}${currentWord}`}
                                         onPress={() => goToWord(`${prefix}${currentWord}`)}
                                     >
                                         <Text key={prefix} style={styles.dataWordLabel}>
@@ -180,6 +181,7 @@ const Word = () => {
                             <View style={styles.dataItemContent}>
                                 {currentWordData?.suffixes1.map(suffix => (
                                     <TouchableWithoutFeedback
+                                        key={`${currentWord}${suffix}`}
                                         onPress={() => goToWord(`${currentWord}${suffix}`)}
                                     >
                                         <Text key={suffix} style={styles.dataWordLabel}>
@@ -243,7 +245,6 @@ const styles = StyleSheet.create({
         flex: 1,
         display: "flex",
         flexDirection: "column",
-        // padding: 4,
         paddingHorizontal: 4,
     },
     wordLabel: {
