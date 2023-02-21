@@ -6,15 +6,21 @@ const CheckInput = ({
     value,
     onChange,
     label,
+    disabled,
+    style,
 }: {
     value: boolean;
     onChange: (value: boolean) => void;
     label: string;
+    disabled?: boolean;
+    style?: object;
 }) => {
     return (
-        <Pressable style={styles.wrapper} onPress={() => onChange(!value)}>
-            <Checkbox value={value} onValueChange={onChange} />
-            <Text style={styles.label}>{label}</Text>
+        <Pressable style={{ ...styles.wrapper, ...style }} onPress={() => onChange(!value)}>
+            <Checkbox value={value} onValueChange={onChange} disabled={disabled} />
+            <Text style={{ ...styles.label, ...(disabled ? styles.labelDisabled : {}) }}>
+                {label}
+            </Text>
         </Pressable>
     );
 };
@@ -30,5 +36,8 @@ const styles = StyleSheet.create({
     },
     label: {
         marginLeft: 8,
+    },
+    labelDisabled: {
+        color: "#bfbfbf",
     },
 });

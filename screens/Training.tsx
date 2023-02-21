@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import Button, { RowButton } from "../components/forms/Button";
+import CheckInput from "../components/forms/CheckInput";
 import NumberInput from "../components/forms/NumberInput";
 import TextInput from "../components/forms/TextInput";
 import ContainingModal from "../components/modals/Containing";
@@ -9,6 +10,9 @@ import TrainingSlice from "../reducers/training";
 import WordsSelectors, { TrainingItem as TrainingItemType } from "../selectors/words";
 import { useDispatch, useSelector } from "../store";
 import { TrainingState } from "../types/training";
+import { atomize, setIndex } from "../utils/array";
+
+type Answers = { [K: TrainingItemType["originalWord"]]: string[] };
 
 const Training = () => {
     const dispatch = useDispatch();
@@ -22,46 +26,78 @@ const Training = () => {
     const [maxLetters, setMaxLetters] = useState(options.maxLetters);
     const [regex, setRegex] = useState(options.regex);
 
-    const [answers, setAnswers] = useState<{ [K: TrainingItemType["originalWord"]]: string }>({});
-    const [retryingAnswers, setRetryingAnswers] = useState<{
-        [K: TrainingItemType["originalWord"]]: string;
-    }>({});
+    const [isMultipleMode, setMultipleMode] = useState<boolean>(false);
 
-    const [trainingState, setTrainingState] = useState<TrainingState>("TRYING");
+    const initialAnswers = () =>
+        trainingItems.reduce((acc, item) => ({ ...acc, [item.originalWord]: [] }), {});
+
+    const [answers, setAnswers] = useState<Answers>(initialAnswers());
+    const [retryingAnswers, setRetryingAnswers] = useState<Answers>({});
+
+    const [trainingState, setTrainingState] = useState<TrainingState>("IDLE");
 
     const [showContainingModal, setShowContainingModal] = useState<boolean>(false);
 
-    const rightAnswerKeys: TrainingItemType["originalWord"][] = useMemo(
+    const rightAnswers: Answers = useMemo(
         () =>
-            trainingItems
-                .filter(
-                    item =>
-                        answers[item.originalWord] &&
-                        item.solutions.includes(answers[item.originalWord].toUpperCase())
-                )
-                .map(item => item.originalWord),
+            trainingItems.reduce(
+                (acc, item) => ({
+                    ...acc,
+                    [item.originalWord]: answers[item.originalWord]
+                        ? atomize(
+                              answers[item.originalWord].filter(answer =>
+                                  item.solutions.includes(answer)
+                              )
+                          )
+                        : [],
+                }),
+                {}
+            ),
         [trainingItems, answers]
     );
 
+    const result = useMemo(() => {
+        const totalWordsCount = trainingItems.reduce(
+            (acc, item) => acc + (isMultipleMode ? item.solutions.length : 1),
+            0
+        );
+        const rightAnswersCount = Object.keys(rightAnswers).reduce(
+            (acc, key) => acc + (rightAnswers ? rightAnswers[key].length : 0),
+            0
+        );
+        const rawScore = (rightAnswersCount / (totalWordsCount || 1)) * 100;
+        const score = Math.round(rawScore * 100 + Number.EPSILON) / 100;
+
+        return { totalWordsCount, rightAnswersCount, score };
+    }, [trainingItems, rightAnswers]);
+
     const reset = () => {
         setTrainingState("TRYING");
-        setAnswers({});
+        setAnswers(initialAnswers());
         setRetryingAnswers({});
         dispatch(TrainingSlice.actions.setOptions({ wordCount, minLetters, maxLetters, regex }));
     };
 
-    const setAnswer = (originalWord: string, answer: string) => {
-        setAnswers(prev => ({ ...prev, [originalWord]: answer }));
+    const setAnswer = (originalWord: string, index: number, answer: string) => {
+        setAnswers(prev => ({
+            ...prev,
+            [originalWord]:
+                prev[originalWord] && prev[originalWord].includes(answer.toUpperCase())
+                    ? prev[originalWord]
+                    : setIndex(prev[originalWord] || [], index, answer),
+        }));
     };
 
-    const setRetryingAnswer = (originalWord: string, answer: string) => {
-        setRetryingAnswers(prev => ({ ...prev, [originalWord]: answer }));
+    const setRetryingAnswer = (originalWord: string, index: number, answer: string) => {
+        setRetryingAnswers(prev => ({
+            ...prev,
+            [originalWord]: setIndex(prev[originalWord] || [], index, answer),
+        }));
     };
 
     const validate = () => {
-        if (trainingState === "RETRYING") {
-            setAnswers(prev => ({ ...prev, ...retryingAnswers }));
-        }
+        setAnswers(rightAnswers);
+        setRetryingAnswers({});
         setTrainingState("VALIDATED");
     };
 
@@ -73,7 +109,7 @@ const Training = () => {
     return (
         <ScrollView style={styles.container}>
             <NumberInput
-                label="Nombre de mots"
+                label={isMultipleMode ? "Nombre d'items" : "Nombre de mots"}
                 min={1}
                 max={50}
                 value={wordCount}
@@ -114,24 +150,31 @@ const Training = () => {
                 <RowButton title="Avec lettres" onPress={() => setShowContainingModal(true)} />
                 <RowButton title="Effacer" onPress={() => setRegex("")} disabled={!regex} />
             </View>
+            <CheckInput
+                label="Demander les anagrammes multiples"
+                value={isMultipleMode}
+                onChange={x => setMultipleMode(x)}
+                disabled={["TRYING", "RETRYING"].includes(trainingState)}
+                style={{ marginVertical: 4 }}
+            />
             <Button title="Générer les mots" onPress={reset} style={styles.resetButton} />
             <View style={styles.items}>
-                {trainingItems.map(item => (
+                {trainingItems.map((item, itemIndex) => (
                     <TrainingItem
                         key={item.originalWord}
                         item={item}
                         trainingState={trainingState}
-                        isAnswerCorrect={rightAnswerKeys.includes(item.originalWord)}
-                        currentInput={
-                            trainingState === "RETRYING"
-                                ? retryingAnswers[item.originalWord]
-                                : answers[item.originalWord]
-                        }
-                        onChangeInput={x =>
-                            trainingState === "RETRYING"
-                                ? setRetryingAnswer(item.originalWord, x)
-                                : setAnswer(item.originalWord, x)
-                        }
+                        isMultipleMode={isMultipleMode}
+                        correctAnswers={rightAnswers[item.originalWord]}
+                        unvalidatedAnswers={retryingAnswers[item.originalWord]}
+                        currentInputs={answers[item.originalWord]}
+                        onChangeInput={(index, x) => {
+                            setAnswer(item.originalWord, index, x);
+                            if (trainingState === "RETRYING") {
+                                setRetryingAnswer(item.originalWord, index, x);
+                            }
+                        }}
+                        isOdd={itemIndex % 2 !== 0}
                     />
                 ))}
             </View>
@@ -145,9 +188,10 @@ const Training = () => {
             {trainingState === "VALIDATED" && (
                 <>
                     <Text style={styles.result}>
-                        {rightAnswerKeys.length}/{trainingItems.length}
+                        {result.rightAnswersCount}/{result.totalWordsCount} (
+                        {result.score.toFixed(2)}%)
                     </Text>
-                    {rightAnswerKeys.length < trainingItems.length ? (
+                    {result.rightAnswersCount < result.totalWordsCount ? (
                         <Button title="Recommencer avec ces mots" onPress={retry} />
                     ) : null}
                 </>

@@ -20,3 +20,24 @@ export const randomElementsFromArray = (array: Array<any>, count: number = 1) =>
     }
     return newArray;
 };
+
+export const addUnique = <T = any>(array: Array<T>, item: T) =>
+    array.includes(item) ? array : [...array, item];
+
+export const addAtIndex = <T = any>(array: Array<T>, index: number, item: T) => {
+    const newArray = [...array];
+    newArray.splice(index, 0, item);
+    return newArray;
+};
+
+export const setIndex = <T = any>(array: Array<T>, index: number, item: T) => {
+    const newArray = [...array];
+    newArray[index] = item;
+    return newArray;
+};
+
+export const addOrRemove = <T = any>(array: Array<T>, item: T) =>
+    array.includes(item) ? array.filter(x => x !== item) : [...array, item];
+
+export const atomize = (array: Array<any>) =>
+    array.reduce((acc, value) => (acc.includes(value) ? acc : [...acc, value]), []);

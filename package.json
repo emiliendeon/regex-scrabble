@@ -10,6 +10,7 @@
     "eject": "expo eject"
   },
   "dependencies": {
+    "@expo/vector-icons": "^13.0.0",
     "@react-navigation/bottom-tabs": "^6.2.0",
     "@react-navigation/native": "^6.0.7",
     "@react-navigation/native-stack": "^6.3.0",
@@ -25,8 +26,7 @@
     "react-native-screens": "~3.18.0",
     "react-native-web": "~0.18.7",
     "react-redux": "^7.2.6",
-    "redux": "^4.1.2",
-    "@expo/vector-icons": "^13.0.0"
+    "redux": "^4.1.2"
   },
   "devDependencies": {
     "@babel/core": "^7.19.3",

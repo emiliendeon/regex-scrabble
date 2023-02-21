@@ -1,1 +1,1 @@
-export type TrainingState = "TRYING" | "RETRYING" | "VALIDATED";
+export type TrainingState = "IDLE" | "TRYING" | "RETRYING" | "VALIDATED";
