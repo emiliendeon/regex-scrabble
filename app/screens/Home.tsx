@@ -57,8 +57,6 @@ export default function Home() {
     const { search, sort } = useSelector(state => state.dictionary);
     const matchedWords = useSelector(state => WordsSelectors.bySearch(state));
 
-    // const tabBarHeight = useBottomTabBarHeight();
-
     const [regex, setRegex] = useState<string>("");
 
     const [computing, setComputing] = useState<boolean>(false);
@@ -99,9 +97,7 @@ export default function Home() {
     }, [search]);
 
     useEffect(() => {
-        // if (matchedWords.length >= 1) {
         setComputing(false);
-        // }
     }, [matchedWords]);
 
     return (
@@ -111,8 +107,6 @@ export default function Home() {
                 placeholder="Saisir un mot ou une expression..."
                 value={regex}
                 onChange={text => setRegex(text)}
-                // onBlur={onRegexInputBlur}
-                // autoCapitalize="none"
                 style={styles.textInput}
             />
             <View style={styles.buttons}>
@@ -146,7 +140,6 @@ export default function Home() {
                         data={matchedWords}
                         renderItem={({ item }) => <MatchedWordItem item={item} />}
                         keyExtractor={item => item.label}
-                        // ListHeaderComponent={<View style={{ height: 6 }} />}
                         ListFooterComponent={<View style={{ height: 8 }} />}
                     />
                 </>
@@ -178,71 +171,3 @@ const styles = StyleSheet.create({
         marginTop: 4,
     },
 });
-
-// const onRegexInputChange = (text: string) => {
-//     console.warn(text);
-//     const newRegex = text
-//         .replace(/\s+/g, "")
-//         .replace(/[ÁáÀàÂâÄäÅå]/g, "A")
-//         .replace(/[Çç]/g, "C")
-//         .replace(/[ÉéÈèÊêËë]/g, "E")
-//         .replace(/[ÍíÌìÎîÏï]/g, "I")
-//         .replace(/[Ññ]/g, "N")
-//         .replace(/[ÓóÒòÔôÖöØø]/g, "O")
-//         .replace(/[ÚúÙùÛûÜü]/g, "U")
-//         .replace(/[ÝýỲỳŶŷŸÿ]/g, "Y")
-//         .replace(/[Ææ]/g, "AE")
-//         .replace(/[Œœ]/g, "OE")
-//         .toUpperCase();
-
-//     console.warn("newRegex", newRegex);
-
-//     setRegex(newRegex);
-// };
-
-// const onRegexInputBlur = () => {
-//     setRegex(prev =>
-//         prev
-//             .replace(/\s+/g, "")
-//             .replace(/[ÁáÀàÂâÄäÅå]/g, "A")
-//             .replace(/[Çç]/g, "C")
-//             .replace(/[ÉéÈèÊêËë]/g, "E")
-//             .replace(/[ÍíÌìÎîÏï]/g, "I")
-//             .replace(/[Ññ]/g, "N")
-//             .replace(/[ÓóÒòÔôÖöØø]/g, "O")
-//             .replace(/[ÚúÙùÛûÜü]/g, "U")
-//             .replace(/[ÝýỲỳŶŷŸÿ]/g, "Y")
-//             .replace(/[Ææ]/g, "AE")
-//             .replace(/[Œœ]/g, "OE")
-//             .toUpperCase()
-//     );
-// };
-
-// const computeMatchedWords = () => {
-//     setComputing(true);
-
-//     textInputRef.current?.blur();
-
-//     const formattedRegex = formatSearch(regex);
-
-//     setRegex(formattedRegex);
-
-//     try {
-//         const regexObject = new RegExp(`^${formattedRegex}$`, "i");
-//         setMatchedWords(
-//             words
-//                 .filter(word => regexObject.test(word))
-//                 .sort((a, b) => {
-//                     const lengthCmp = a.length - b.length;
-//                     if (lengthCmp !== 0) {
-//                         return lengthCmp;
-//                     }
-//                     return a > b ? 1 : -1;
-//                 })
-//         );
-//     } catch (e) {
-//         setRegex("");
-//     }
-
-//     setComputing(false);
-// };

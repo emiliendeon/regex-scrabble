@@ -42,7 +42,6 @@ const TabNavigator = () => (
                     }}
                 />
             ),
-            // headerShown: false,
             tabBarActiveTintColor: "#000000",
             tabBarInactiveTintColor: "#bfbfbf",
             tabBarLabelStyle: { fontSize: 14 },

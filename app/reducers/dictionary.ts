@@ -1,7 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export type DictionaryStore = {
-    // words: string[];
     search: string;
     sort: {
         criterion: "LABEL" | "LENGTH" | "VALUE";
@@ -11,7 +10,6 @@ export type DictionaryStore = {
 };
 
 const initialState: DictionaryStore = {
-    // words: [],
     search: "",
     sort: {
         criterion: "LENGTH",
@@ -24,9 +22,6 @@ const DictionarySlice = createSlice({
     name: "dictionary",
     initialState,
     reducers: {
-        // setWords: (state, { payload }: PayloadAction<DictionaryStore["words"]>) => {
-        //     state.words = payload;
-        // },
         setSearch: (state, { payload }: PayloadAction<DictionaryStore["search"]>) => {
             state.search = payload;
         },

@@ -58,9 +58,7 @@ const ContainingModal = ({
 export default ContainingModal;
 
 const styles = StyleSheet.create({
-    textInput: {
-        // marginBottom: 8,
-    },
+    textInput: {},
     button: {
         marginTop: 16,
     },

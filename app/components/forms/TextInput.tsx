@@ -61,7 +61,7 @@ const TextInput = forwardRef<RNTextInput, TextInputProps>(
                     onSubmitEditing={onSubmitEditing}
                     blurOnSubmit={true}
                     autoCorrect={false}
-                    autoCompleteType="off"
+                    autoComplete="off"
                     spellCheck={false}
                     style={styles.textInput}
                 />
