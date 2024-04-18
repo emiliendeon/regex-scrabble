@@ -1,5 +1,5 @@
 import { createSelector } from "@reduxjs/toolkit";
-import ods8 from "../assets/ods8";
+import ods from "../assets/ods9";
 import { computeWordValues } from "../computers/word";
 import { Store } from "../store";
 import { randomElementsFromArray, shuffleArray } from "../utils/array";
@@ -12,7 +12,7 @@ const getSort = (state: Store) => state.dictionary.sort;
 const getTrainingOptions = (state: Store) => state.training.options;
 const getLastTrainingGenerationTimestamp = (state: Store) => state.training.lastGenerationTimestamp;
 
-const words: string[] = ods8;
+const words: string[] = ods;
 
 export type WordItem = {
     label: string;

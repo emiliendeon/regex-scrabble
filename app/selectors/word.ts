@@ -1,11 +1,11 @@
 import { createSelector } from "@reduxjs/toolkit";
-import ods8 from "../assets/ods8";
+import ods from "../assets/ods9";
 import { Store } from "../store";
 import Regex from "../utils/regex";
 
 const getCurrentWord = (state: Store) => state.dictionary.currentWord;
 
-const words: string[] = ods8;
+const words: string[] = ods;
 
 const WordSelectors = {
     currentWordData: createSelector(getCurrentWord, currentWord => {
