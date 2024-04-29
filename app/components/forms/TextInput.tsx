@@ -63,6 +63,7 @@ const TextInput = forwardRef<RNTextInput, TextInputProps>(
                     autoCorrect={false}
                     autoComplete="off"
                     spellCheck={false}
+                    autoCapitalize="characters"
                     style={styles.textInput}
                 />
             </Pressable>

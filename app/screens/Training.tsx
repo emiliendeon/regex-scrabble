@@ -46,7 +46,7 @@ const Training = () => {
                     [item.originalWord]: answers[item.originalWord]
                         ? atomize(
                               answers[item.originalWord].filter(answer =>
-                                  item.solutions.includes(answer)
+                                  item.solutions.includes(answer.toUpperCase())
                               )
                           )
                         : [],
@@ -154,7 +154,9 @@ const Training = () => {
                 label="Demander les anagrammes multiples"
                 value={isMultipleMode}
                 onChange={x => setMultipleMode(x)}
-                disabled={["TRYING", "RETRYING"].includes(trainingState)}
+                disabled={
+                    ["TRYING", "RETRYING"].includes(trainingState) && trainingItems.length >= 1
+                }
                 style={{ marginVertical: 4 }}
             />
             <Button title="Générer les mots" onPress={reset} style={styles.resetButton} />

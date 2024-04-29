@@ -16,7 +16,11 @@ const CheckInput = ({
     style?: object;
 }) => {
     return (
-        <Pressable style={{ ...styles.wrapper, ...style }} onPress={() => onChange(!value)}>
+        <Pressable
+            style={{ ...styles.wrapper, ...style }}
+            onPress={() => onChange(!value)}
+            disabled={disabled}
+        >
             <Checkbox value={value} onValueChange={onChange} disabled={disabled} />
             <Text style={{ ...styles.label, ...(disabled ? styles.labelDisabled : {}) }}>
                 {label}
