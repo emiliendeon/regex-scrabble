@@ -8,17 +8,14 @@ type NumberInputProps = {
     max?: number;
     value: number;
     onChange: (value: number) => void;
+    disabled?: boolean;
     style?: object;
 };
 
 const NumberInput = forwardRef<RNTextInput, NumberInputProps>(
-    ({ label, min, max, value, onChange, style }: NumberInputProps, ref) => {
+    ({ label, min, max, value, onChange, disabled, style }: NumberInputProps, ref) => {
         const localRef = useRef<RNTextInput>(null);
         const textInputRef = (ref as React.RefObject<RNTextInput>) || localRef;
-
-        const handleFocus = () => {
-            textInputRef.current?.focus();
-        };
 
         const handleTextChange = (text: string) => {
             if (/^[0-9]*$/.test(text)) {
@@ -33,14 +30,18 @@ const NumberInput = forwardRef<RNTextInput, NumberInputProps>(
         const isIncrementDisabled = useMemo(() => max !== undefined && value >= max, [max, value]);
 
         return (
-            <Pressable style={{ ...styles.wrapper, ...style }}>
-                {label ? <Text style={styles.label}>{label} :</Text> : null}
+            <Pressable disabled={disabled} style={{ ...styles.wrapper, ...style }}>
+                {label ? (
+                    <Text style={{ ...styles.label, ...(disabled ? styles.labelDisabled : {}) }}>
+                        {label} :
+                    </Text>
+                ) : null}
                 <View style={styles.inputWrapper}>
                     <Button
                         title="-"
                         onPress={() => onChange(value - 1)}
                         style={styles.button}
-                        disabled={isDecrementDisabled}
+                        disabled={disabled || isDecrementDisabled}
                     />
                     <RNTextInput
                         ref={textInputRef}
@@ -48,13 +49,17 @@ const NumberInput = forwardRef<RNTextInput, NumberInputProps>(
                         onChangeText={handleTextChange}
                         keyboardType="numeric"
                         blurOnSubmit={true}
-                        style={styles.textInput}
+                        aria-disabled={disabled}
+                        style={{
+                            ...styles.textInput,
+                            ...(disabled ? styles.textInputDisabled : {}),
+                        }}
                     />
                     <Button
                         title="+"
                         onPress={() => onChange(value + 1)}
                         style={styles.button}
-                        disabled={isIncrementDisabled}
+                        disabled={disabled || isIncrementDisabled}
                     />
                 </View>
             </Pressable>
@@ -76,6 +81,9 @@ const styles = StyleSheet.create({
         marginRight: 8,
         fontSize: 16,
     },
+    labelDisabled: {
+        color: "#bfbfbf",
+    },
     inputWrapper: {
         display: "flex",
         flexDirection: "row",
@@ -94,5 +102,8 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: "#000000",
         borderRadius: 4,
+    },
+    textInputDisabled: {
+        opacity: 0.4,
     },
 });

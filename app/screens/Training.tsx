@@ -26,7 +26,7 @@ const Training = () => {
     const [maxLetters, setMaxLetters] = useState(options.maxLetters);
     const [regex, setRegex] = useState(options.regex);
 
-    const [isMultipleMode, setMultipleMode] = useState<boolean>(false);
+    const [isMultipleMode, setMultipleMode] = useState<boolean>(true);
 
     const initialAnswers = () =>
         trainingItems.reduce((acc, item) => ({ ...acc, [item.originalWord]: [] }), {});
@@ -70,6 +70,10 @@ const Training = () => {
 
         return { totalWordsCount, rightAnswersCount, score };
     }, [trainingItems, rightAnswers]);
+
+    const isTrying = useMemo(() => {
+        return ["TRYING", "RETRYING"].includes(trainingState) && trainingItems.length >= 1;
+    }, [trainingState, trainingItems.length]);
 
     const reset = () => {
         setTrainingState("TRYING");
@@ -121,11 +125,12 @@ const Training = () => {
                 max={50}
                 value={itemsCount}
                 onChange={x => setItemsCount(x)}
+                disabled={isTrying}
             />
             <NumberInput
                 label="Nombre de lettres minimum"
                 min={2}
-                max={21}
+                max={15}
                 value={minLetters}
                 onChange={x => {
                     setMinLetters(x);
@@ -133,11 +138,12 @@ const Training = () => {
                         setMaxLetters(x);
                     }
                 }}
+                disabled={isTrying}
             />
             <NumberInput
                 label="Nombre de lettres maximum"
                 min={2}
-                max={21}
+                max={15}
                 value={maxLetters}
                 onChange={x => {
                     setMaxLetters(x);
@@ -145,28 +151,41 @@ const Training = () => {
                         setMinLetters(x);
                     }
                 }}
+                disabled={isTrying}
             />
             <TextInput
                 label="Filtre"
                 placeholder="Saisir une expression"
                 value={regex}
                 onChange={x => setRegex(x)}
+                disabled={isTrying}
                 style={styles.regexInput}
             />
             <View style={styles.buttons}>
-                <RowButton title="Avec lettres" onPress={() => setShowContainingModal(true)} />
-                <RowButton title="Effacer" onPress={() => setRegex("")} disabled={!regex} />
+                <RowButton
+                    title="Avec lettres"
+                    onPress={() => setShowContainingModal(true)}
+                    disabled={isTrying}
+                />
+                <RowButton
+                    title="Effacer"
+                    onPress={() => setRegex("")}
+                    disabled={isTrying || !regex}
+                />
             </View>
             <CheckInput
                 label="Demander les anagrammes multiples"
                 value={isMultipleMode}
                 onChange={x => setMultipleMode(x)}
-                disabled={
-                    ["TRYING", "RETRYING"].includes(trainingState) && trainingItems.length >= 1
-                }
+                disabled={isTrying}
                 style={{ marginVertical: 4 }}
             />
-            <Button title="Générer les mots" onPress={reset} style={styles.resetButton} />
+            <Button
+                title="Générer les mots"
+                onPress={reset}
+                disabled={isTrying}
+                style={styles.resetButton}
+            />
             <View style={styles.items}>
                 {trainingItems.map((item, itemIndex) => (
                     <TrainingItem

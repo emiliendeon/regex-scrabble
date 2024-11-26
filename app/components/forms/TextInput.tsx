@@ -9,6 +9,7 @@ type TextInputProps = {
     onBlur?: () => void;
     onSubmitEditing?: () => void;
     cleanPattern?: string;
+    disabled?: boolean;
     style?: object;
 };
 
@@ -22,6 +23,7 @@ const TextInput = forwardRef<RNTextInput, TextInputProps>(
             onBlur,
             onSubmitEditing,
             cleanPattern,
+            disabled,
             style,
         }: TextInputProps,
         ref
@@ -50,8 +52,16 @@ const TextInput = forwardRef<RNTextInput, TextInputProps>(
         };
 
         return (
-            <Pressable style={{ ...styles.wrapper, ...style }} onPress={handleFocus}>
-                {label ? <Text style={styles.label}>{label}</Text> : null}
+            <Pressable
+                onPress={handleFocus}
+                disabled={disabled}
+                style={{ ...styles.wrapper, ...style }}
+            >
+                {label ? (
+                    <Text style={{ ...styles.label, ...(disabled ? styles.labelDisabled : {}) }}>
+                        {label}
+                    </Text>
+                ) : null}
                 <RNTextInput
                     ref={textInputRef}
                     placeholder={placeholder}
@@ -64,7 +74,11 @@ const TextInput = forwardRef<RNTextInput, TextInputProps>(
                     autoComplete="off"
                     spellCheck={false}
                     autoCapitalize="characters"
-                    style={styles.textInput}
+                    aria-disabled={disabled}
+                    style={{
+                        ...styles.textInput,
+                        ...(disabled ? styles.textInputDisabled : {}),
+                    }}
                 />
             </Pressable>
         );
@@ -82,6 +96,9 @@ const styles = StyleSheet.create({
         marginBottom: 2,
         fontSize: 16,
     },
+    labelDisabled: {
+        color: "#bfbfbf",
+    },
     textInput: {
         padding: 4,
         fontSize: 20,
@@ -90,5 +107,8 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: "#000000",
         borderRadius: 4,
+    },
+    textInputDisabled: {
+        opacity: 0.4,
     },
 });
