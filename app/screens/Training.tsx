@@ -21,7 +21,7 @@ const Training = () => {
 
     const options = useSelector(state => state.training.options);
 
-    const [wordCount, setWordCount] = useState(options.wordCount);
+    const [itemsCount, setItemsCount] = useState(options.itemsCount);
     const [minLetters, setMinLetters] = useState(options.minLetters);
     const [maxLetters, setMaxLetters] = useState(options.maxLetters);
     const [regex, setRegex] = useState(options.regex);
@@ -45,9 +45,9 @@ const Training = () => {
                     ...acc,
                     [item.originalWord]: answers[item.originalWord]
                         ? atomize(
-                              answers[item.originalWord].filter(answer =>
-                                  item.solutions.includes(answer.toUpperCase())
-                              )
+                                answers[item.originalWord].filter(answer =>
+                                    item.solutions.includes(answer.toUpperCase())
+                                )
                           )
                         : [],
                 }),
@@ -75,7 +75,14 @@ const Training = () => {
         setTrainingState("TRYING");
         setAnswers(initialAnswers());
         setRetryingAnswers({});
-        dispatch(TrainingSlice.actions.setOptions({ wordCount, minLetters, maxLetters, regex }));
+        dispatch(
+            TrainingSlice.actions.setOptions({
+                itemsCount,
+                minLetters,
+                maxLetters,
+                regex,
+            })
+        );
     };
 
     const setAnswer = (originalWord: string, index: number, answer: string) => {
@@ -112,8 +119,8 @@ const Training = () => {
                 label={isMultipleMode ? "Nombre d'items" : "Nombre de mots"}
                 min={1}
                 max={50}
-                value={wordCount}
-                onChange={x => setWordCount(x)}
+                value={itemsCount}
+                onChange={x => setItemsCount(x)}
             />
             <NumberInput
                 label="Nombre de lettres minimum"

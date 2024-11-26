@@ -7,16 +7,19 @@ export const shuffleArray = <T = any>(array: Array<T>) => {
     return newArray;
 };
 
-export const randomElementsFromArray = (array: Array<any>, count: number = 1) => {
-    if (count >= array.length) {
-        return array;
+export const randomElementsFromArray = <T = any>(
+    array: Array<T>,
+    count: number = 1,
+    predicate?: (value: T, index: number, array: T[]) => boolean
+) => {
+    const filteredArray = predicate ? array.filter(predicate) : [...array];
+    if (count >= filteredArray.length) {
+        return filteredArray;
     }
-    const newArray: Array<any> = [];
+    const newArray: Array<T> = [];
     while (newArray.length < count) {
-        const x = Math.floor(Math.random() * array.length);
-        if (!newArray.includes(array[x])) {
-            newArray.push(array[x]);
-        }
+        const index = Math.floor(Math.random() * filteredArray.length);
+        newArray.push(filteredArray.splice(index, 1)[0]);
     }
     return newArray;
 };

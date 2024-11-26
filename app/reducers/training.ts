@@ -2,7 +2,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export type TrainingStore = {
     options: {
-        wordCount: number;
+        itemsCount: number;
         minLetters: number;
         maxLetters: number;
         regex: string;
@@ -12,7 +12,7 @@ export type TrainingStore = {
 
 const initialState: TrainingStore = {
     options: {
-        wordCount: 5,
+        itemsCount: 5,
         minLetters: 2,
         maxLetters: 7,
         regex: "",

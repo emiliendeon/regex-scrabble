@@ -93,8 +93,10 @@ const WordsSelectors = {
                         (!trainingRegex || trainingRegex.test(word))
                 );
 
-                const trainingWords: TrainingItem[] = shuffleArray<string>(
-                    randomElementsFromArray(filteredWords, options.wordCount)
+                // first selection to optimize filtering and formatting
+                const candidateTrainingItems: TrainingItem[] = randomElementsFromArray(
+                    filteredWords,
+                    options.itemsCount * 10
                 ).map(word => {
                     const regex = new RegExp(`^${Regex.anagram(word)}$`);
                     return {
@@ -104,7 +106,20 @@ const WordsSelectors = {
                     };
                 });
 
-                return trainingWords;
+                return shuffleArray(
+                    randomElementsFromArray(
+                        candidateTrainingItems,
+                        options.itemsCount,
+                        (trainingItem, index, array) =>
+                            !array
+                                .slice(0, index)
+                                .some(filteredTrainingItem =>
+                                    filteredTrainingItem.solutions.includes(
+                                        trainingItem.originalWord
+                                    )
+                                )
+                    )
+                );
             } catch (e) {
                 console.warn(e);
                 return [];
