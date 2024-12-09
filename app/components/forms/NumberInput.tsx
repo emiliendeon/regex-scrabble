@@ -1,6 +1,7 @@
-import React, { forwardRef, useMemo, useRef } from "react";
+import React, { forwardRef, useEffect, useMemo, useRef, useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput as RNTextInput, View } from "react-native";
 import Button from "./Button";
+import { isNumberInRange } from "../../utils/number";
 
 type NumberInputProps = {
     label?: string;
@@ -17,13 +18,32 @@ const NumberInput = forwardRef<RNTextInput, NumberInputProps>(
         const localRef = useRef<RNTextInput>(null);
         const textInputRef = (ref as React.RefObject<RNTextInput>) || localRef;
 
+        const [localValue, setLocalValue] = useState<NumberInputProps["value"]>(value);
+
+        useEffect(() => {
+            setLocalValue(value);
+        }, [value]);
+
+        const onLocalBlur = () => {
+            setLocalValue(value);
+        };
+
         const handleTextChange = (text: string) => {
-            if (/^[0-9]*$/.test(text)) {
-                let parsed = parseInt(text) || 0;
-                parsed = min !== undefined ? Math.max(parsed, min) : parsed;
-                parsed = max !== undefined ? Math.min(parsed, max) : parsed;
+            if (!/^[0-9]*$/.test(text)) {
+                return;
+            }
+
+            let parsed = parseInt(text) || 0;
+
+            if (max !== undefined && parsed > max) {
+                parsed %= 10;
+            }
+
+            if (isNumberInRange([min, max], parsed)) {
                 onChange(parsed);
             }
+
+            setLocalValue(parsed);
         };
 
         const isDecrementDisabled = useMemo(() => min !== undefined && value <= min, [min, value]);
@@ -45,8 +65,9 @@ const NumberInput = forwardRef<RNTextInput, NumberInputProps>(
                     />
                     <RNTextInput
                         ref={textInputRef}
-                        value={String(value)}
+                        value={String(localValue)}
                         onChangeText={handleTextChange}
+						onBlur={onLocalBlur}
                         keyboardType="numeric"
                         blurOnSubmit={true}
                         aria-disabled={disabled}
