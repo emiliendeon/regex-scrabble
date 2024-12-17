@@ -46,7 +46,7 @@ const WordsSelectors = {
                 return words.includes(search) ? [computeWordItemData(search)] : [];
             }
 
-            const regexObject = new RegExp(`^${search}$`, "i");
+            const regexObject = new RegExp(`^(${search})$`, "i");
             return words
                 .filter(word => regexObject.test(word))
                 .map(word => computeWordItemData(word))
@@ -84,7 +84,7 @@ const WordsSelectors = {
             if (!lastTrainingGenerationTimestamp) return [];
 
             try {
-                const trainingRegex = options.regex ? new RegExp(`^${options.regex}$`) : null;
+                const trainingRegex = options.regex ? new RegExp(`^(${options.regex})$`) : null;
 
                 const filteredWords = words.filter(
                     word =>
